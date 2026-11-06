@@ -1,4 +1,3 @@
-
 pipeline {
     agent any
 
@@ -20,16 +19,23 @@ pipeline {
 
         stage('Build Docker Image') {
             steps {
-                echo 'Building Docker image'
-                bat 'docker build -t supermarket-app:1.0 .'
+                echo 'Building Docker image using Docker Desktop'
+
+                withEnv(['DOCKER_HOST=npipe:////./pipe/dockerDesktopLinuxEngine']) {
+                    bat 'docker version'
+                    bat 'docker build -t supermarket-app:1.0 .'
+                }
             }
         }
 
         stage('Verify Docker Image') {
             steps {
                 echo 'Verifying Docker image'
-                bat 'docker image inspect supermarket-app:1.0'
-                bat 'docker images supermarket-app'
+
+                withEnv(['DOCKER_HOST=npipe:////./pipe/dockerDesktopLinuxEngine']) {
+                    bat 'docker image inspect supermarket-app:1.0'
+                    bat 'docker images supermarket-app'
+                }
             }
         }
     }
@@ -38,9 +44,9 @@ pipeline {
         success {
             echo 'CI pipeline completed successfully'
         }
+
         failure {
             echo 'CI pipeline failed. Check the console output.'
         }
     }
 }
-
